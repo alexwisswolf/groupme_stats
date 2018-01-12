@@ -140,7 +140,7 @@ class GroupMe(object):
             except ZeroDivisionError:
                 summary[user]['likes_per_message'] = None
             try:
-                summary[user]['send_receive_ratio'] = summary[user]["likes_sent"] / summary[user]["message_count"]
+                summary[user]['send_receive_ratio'] = summary[user]["likes_sent"] / summary[user]["likes_received"]
             except ZeroDivisionError:
                 summary[user]['send_receive_ratio'] = None
 
