@@ -26,7 +26,8 @@ class GroupMe(object):
         if resp.status_code == 200:
             return resp.json()['response']
         else:
-            print("Failed to get groups")
+            print("Failed to get groups.")
+            print(response.text)
             exit(1)
 
     def get_group_id(self, group_name):
@@ -45,6 +46,7 @@ class GroupMe(object):
             return resp.json()['response']
         else:
             print("Failed to get group {}.".format(group_id))
+            print(resp.text)
             exit(1)
         
 
@@ -75,7 +77,6 @@ class GroupMe(object):
                 print("Retrieved all messages")
             else:
                 print("Failed to get messages for group {}. Exiting.".format(group_id))
-                print(return_code)
                 print(resp.text)
                 exit(1)
             print("Retrieved {} messages out of {}.".format(len(self.messages), content['count']))
@@ -109,11 +110,14 @@ class GroupMe(object):
                 user = message['user_id']
                 summary[user]['message_count'] += 1
                 summary[user]['like_count'] += len(message['favorited_by'])
+                if user in message['favorited_by']:
+                    summary[user]['self_likes'] += 1
 
             except KeyError:
                 summary[user] = {
                     "message_count": 0,
-                    "like_count": 0
+                    "like_count": 0,
+                    "self_likes": 0
                 }
         
         group = self.get_group(group_id)
@@ -121,8 +125,14 @@ class GroupMe(object):
         for member in group['members']:
             nicknames[member['user_id']] = member['nickname']
         for user in summary.keys():
-            summary[user]['nickname'] = nicknames[user]
-            summary[user]['likes_per_message'] = summary[user]["like_count"] / summary[user]["message_count"]
+            try:
+                summary[user]['nickname'] = nicknames[user]
+            except KeyError:
+                summary[user]['nickname'] = ""
+            try:
+                summary[user]['likes_per_message'] = summary[user]["like_count"] / summary[user]["message_count"]
+            except ZeroDivisionError:
+                summary[user]['likes_per_message'] = None
 
         return summary
 
