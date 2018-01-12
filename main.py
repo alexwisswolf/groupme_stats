@@ -1,4 +1,5 @@
 import requests
+import csv
 
 class GroupMe(object):
     def __init__(self, token):
@@ -52,8 +53,8 @@ class GroupMe(object):
 
     def get_all_messages(self, group_id, limit=100):
         return_code = -1
-        while return_code != 304:
-        #while len(self.messages) < 500:
+        #while return_code != 304:
+        while len(self.messages) < 500:
             if self.messages == []:
                 params = {
                     "limit": limit
@@ -109,15 +110,20 @@ class GroupMe(object):
             try:
                 user = message['user_id']
                 summary[user]['message_count'] += 1
-                summary[user]['like_count'] += len(message['favorited_by'])
+                summary[user]['likes_received'] += len(message['favorited_by'])
                 if user in message['favorited_by']:
                     summary[user]['self_likes'] += 1
+
+                for liker in message['favorited_by']:
+                    summary[liker]['likes_sent'] += 1
+
 
             except KeyError:
                 summary[user] = {
                     "message_count": 0,
-                    "like_count": 0,
-                    "self_likes": 0
+                    "likes_received": 0,
+                    "self_likes": 0,
+                    "likes_sent": 0
                 }
         
         group = self.get_group(group_id)
@@ -128,11 +134,15 @@ class GroupMe(object):
             try:
                 summary[user]['nickname'] = nicknames[user]
             except KeyError:
-                summary[user]['nickname'] = ""
+                summary[user]['nickname'] = None
             try:
-                summary[user]['likes_per_message'] = summary[user]["like_count"] / summary[user]["message_count"]
+                summary[user]['likes_per_message'] = summary[user]["likes_received"] / summary[user]["message_count"]
             except ZeroDivisionError:
                 summary[user]['likes_per_message'] = None
+            try:
+                summary[user]['send_receive_ratio'] = summary[user]["likes_sent"] / summary[user]["message_count"]
+            except ZeroDivisionError:
+                summary[user]['send_receive_ratio'] = None
 
         return summary
 
@@ -154,5 +164,13 @@ if __name__ == "__main__":
 
     summary = group_me.sum_likes(group_id)
     print(summary)
-    for user, info in summary.items():
-        print(info)
+    with open('groupme_summary.csv', 'w', newline="\n") as csv_file:
+        print(list(summary.keys())[0])
+        writer = csv.DictWriter(csv_file, fieldnames=summary[list(summary.keys())[0]].keys())
+        writer.writeheader()
+        for user, info in summary.items():
+            print(info)
+            writer.writerow(info)
+            
+
+    
