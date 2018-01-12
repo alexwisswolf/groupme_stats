@@ -50,8 +50,8 @@ class GroupMe(object):
 
     def get_all_messages(self, group_id, limit=100):
         return_code = -1
-        #while return_code != 304:
-        while len(self.messages) < 500:
+        while return_code != 304:
+        #while len(self.messages) < 500:
             if self.messages == []:
                 params = {
                     "limit": limit
@@ -78,6 +78,7 @@ class GroupMe(object):
                 print(return_code)
                 print(resp.text)
                 exit(1)
+            print("Retrieved {} messages out of {}.".format(len(self.messages), content['count']))
             last_message = self.messages[-1]['id']
 
         return self.messages
