@@ -53,8 +53,8 @@ class GroupMe(object):
 
     def get_all_messages(self, group_id, limit=100):
         return_code = -1
-        #while return_code != 304:
-        while len(self.messages) < 500:
+        while return_code != 304:
+        #while len(self.messages) < 500:
             if self.messages == []:
                 params = {
                     "limit": limit
