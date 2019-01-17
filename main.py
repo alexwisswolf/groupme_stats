@@ -93,7 +93,15 @@ class GroupMe(object):
             "favorited_by": []
         }
         for message in self.messages:
-            if len(message['favorited_by']) >= len(most_liked['favorited_by']):
+            if message.get("text"):
+            
+                message_text = message["text"].encode("ascii", "ignore").decode("ascii")
+
+                if "270" in message_text:
+                    print("Found")
+                    print(message)
+                
+            if len(message['favorited_by']) > len(most_liked['favorited_by']):
                 print(most_liked)
                 print(len(message['favorited_by']))
                 most_liked = message
@@ -151,7 +159,7 @@ if __name__ == "__main__":
     token = sys.argv[1]
     group_me = GroupMe(token)
 
-    group_name = "https://www.ncpgambling.org"
+    group_name = "NPR Totebags and John Oliver"
     #group_name = "Nash New Years"
     group_id = group_me.get_group_id(group_name)
 
